@@ -1,0 +1,25 @@
+name: Test Reusable Workflow
+
+on:
+  workflow_call:
+    inputs:
+      message:
+        description: "Message from caller"
+        required: true
+        type: string
+
+jobs:
+  reusable-test:
+    runs-on: self-hosted
+
+    steps:
+      - name: Test reusable workflow
+        run: |
+          echo "================================"
+          echo "Reusable workflow is working!"
+          echo "Message: ${{ inputs.message }}"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Runner: $(hostname)"
+          echo "User: $(whoami)"
+          echo "================================"
