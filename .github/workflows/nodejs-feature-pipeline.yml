@@ -18,14 +18,18 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Show project information
+      - name: Show pipeline information
         run: |
+          echo "================================"
+          echo "NodeJS Feature Pipeline"
+          echo "================================"
           echo "Project: ${{ inputs.project }}"
           echo "Component: ${{ inputs.component }}"
           echo "Repository: $GITHUB_REPOSITORY"
           echo "Branch: $GITHUB_REF_NAME"
-          echo "Runner: $(hostname)"
-          echo "User: $(whoami)"
+          echo "Runner hostname: $(hostname)"
+          echo "Runner user: $(whoami)"
+          echo "================================"
