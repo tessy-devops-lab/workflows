@@ -9,7 +9,7 @@ on:
         type: string
 
 jobs:
-  reusable-test:
+  test:
     runs-on: self-hosted
 
     steps:
@@ -18,8 +18,6 @@ jobs:
           echo "================================"
           echo "Reusable workflow is working!"
           echo "Message: ${{ inputs.message }}"
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "Branch: $GITHUB_REF_NAME"
-          echo "Runner: $(hostname)"
+          echo "Hostname: $(hostname)"
           echo "User: $(whoami)"
           echo "================================"
