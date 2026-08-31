@@ -38,7 +38,13 @@ jobs:
 
       - name: Run tests
         run: npm test
-        
+
       - name: Build Docker image
         run: |
           docker build -t github-actions-app:${{ github.sha }} .
+      
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | \
+          docker login --username AWS --password-stdin \
+          627407462345.dkr.ecr.us-east-1.amazonaws.com    
