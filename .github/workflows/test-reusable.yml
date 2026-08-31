@@ -52,4 +52,8 @@ jobs:
       - name: Tag Docker image
         run: |
           docker tag github-actions-app:${{ github.sha }} \
-          627407462345.dkr.ecr.us-east-1.amazonaws.com/github-actions-app:${{ github.sha }}    
+          627407462345.dkr.ecr.us-east-1.amazonaws.com/github-actions-app:${{ github.sha }}   
+          
+      - name: Push Docker image to ECR
+        run: |
+          docker push 627407462345.dkr.ecr.us-east-1.amazonaws.com/github-actions-app:${{ github.sha }}    
