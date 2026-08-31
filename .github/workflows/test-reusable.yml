@@ -1,4 +1,4 @@
-name: Test Reusable Workflow
+name: NodeJS Reusable Pipeline
 
 on:
   workflow_call:
@@ -13,11 +13,28 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Test reusable workflow
+      - name: Checkout application code
+        uses: actions/checkout@v4
+
+      - name: Show pipeline information
         run: |
           echo "================================"
-          echo "Reusable workflow is working!"
-          echo "Message: ${{ inputs.message }}"
-          echo "Hostname: $(hostname)"
-          echo "User: $(whoami)"
+          echo "NodeJS Reusable Pipeline"
           echo "================================"
+          echo "Message: ${{ inputs.message }}"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Runner hostname: $(hostname)"
+          echo "Runner user: $(whoami)"
+          echo "================================"
+
+      - name: Check NodeJS
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
