@@ -8,6 +8,11 @@ on:
         required: true
         type: string
 
+      ecr_repository:
+        description: "ECR repository name"
+        required: true
+        type: string  
+
 jobs:
   test:
     runs-on: self-hosted
@@ -41,8 +46,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t github-actions-app:${{ github.sha }} .
-      
+          docker build -t ${{ inputs.ecr_repository }}:${{ github.sha }} .
+
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region us-east-1 | \
@@ -51,9 +56,9 @@ jobs:
       
       - name: Tag Docker image
         run: |
-          docker tag github-actions-app:${{ github.sha }} \
-          627407462345.dkr.ecr.us-east-1.amazonaws.com/github-actions-app:${{ github.sha }}   
-          
+          docker tag ${{ inputs.ecr_repository }}:${{ github.sha }} \
+          627407462345.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+      
       - name: Push Docker image to ECR
         run: |
-          docker push 627407462345.dkr.ecr.us-east-1.amazonaws.com/github-actions-app:${{ github.sha }}    
+          docker push 627407462345.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }} 
