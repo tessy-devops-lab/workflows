@@ -13,6 +13,11 @@ on:
         required: true
         type: string  
 
+      aws_region:
+        description: "AWS region"
+        required: true
+        type: string  
+
 jobs:
   test:
     runs-on: self-hosted
@@ -50,15 +55,15 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region us-east-1 | \
+          aws ecr get-login-password --region ${{ inputs.aws_region }}| \
           docker login --username AWS --password-stdin \
-          627407462345.dkr.ecr.us-east-1.amazonaws.com    
+          627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com    
       
       - name: Tag Docker image
         run: |
           docker tag ${{ inputs.ecr_repository }}:${{ github.sha }} \
-          627407462345.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+          627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
       
       - name: Push Docker image to ECR
         run: |
-          docker push 627407462345.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }} 
+          docker push 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }} 
