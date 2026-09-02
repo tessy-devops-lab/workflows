@@ -70,6 +70,9 @@ jobs:
 
       - name: Deploy application
         run: |
+          OLD_IMAGE=$(docker inspect ${{ inputs.ecr_repository }} --format '{{.Config.Image}}' 2>/dev/null || true)
+          echo "Previous image: $OLD_IMAGE"
+
           docker pull 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
 
           docker stop ${{ inputs.ecr_repository }} || true
