@@ -79,3 +79,13 @@ jobs:
             --name ${{ inputs.ecr_repository }} \
             -p 3000:3000 \
             627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+         
+      - name: Verify deployment
+        run: |
+          echo "Checking application container..."
+          docker ps --filter "name=${{ inputs.ecr_repository }}"
+
+          echo "Checking application response..."
+          curl --fail http://localhost:3000
+
+          echo "Deployment verification successful!"
