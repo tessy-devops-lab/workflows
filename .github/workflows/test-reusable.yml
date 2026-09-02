@@ -68,10 +68,17 @@ jobs:
         run: |
           docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
 
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+
+    steps:
       - name: Deploy application
         id: deploy
         run: |
           OLD_IMAGE=$(docker inspect ${{ inputs.ecr_repository }} --format '{{.Config.Image}}' 2>/dev/null || true)
+
           echo "Previous image: $OLD_IMAGE"
 
           echo "old_image=$OLD_IMAGE" >> "$GITHUB_OUTPUT"
@@ -91,6 +98,7 @@ jobs:
       - name: Verify deployment
         run: |
           echo "Checking application container..."
+
           docker ps --filter "name=${{ inputs.ecr_repository }}"
 
           echo "Waiting for application to become ready..."
@@ -106,6 +114,7 @@ jobs:
           done
 
           echo "Deployment verification failed!"
+
           docker logs ${{ inputs.ecr_repository }}
 
           echo "Rolling back to previous image..."
@@ -124,6 +133,7 @@ jobs:
             sleep 3
 
             echo "Checking rollback..."
+
             curl --fail http://localhost:3000
 
             echo "Rollback successful!"
