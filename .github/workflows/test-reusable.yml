@@ -85,6 +85,9 @@ jobs:
           echo "Checking application container..."
           docker ps --filter "name=${{ inputs.ecr_repository }}"
 
+          echo "Waiting for application to start..."
+          sleep 5
+
           echo "Checking application response..."
           curl --fail http://localhost:3000
 
