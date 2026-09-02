@@ -19,7 +19,7 @@ on:
         type: string
 
 jobs:
-  test:
+  build:
     runs-on: self-hosted
 
     steps:
