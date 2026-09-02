@@ -130,5 +130,3 @@ jobs:
           else
             echo "No previous image found. Nothing to roll back to."
           fi
-
-          exit 1
