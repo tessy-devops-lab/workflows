@@ -55,7 +55,7 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ inputs.aws_region }}| \
+          aws ecr get-login-password --region ${{ inputs.aws_region }} | \
           docker login --username AWS --password-stdin \
           627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
 
@@ -69,11 +69,16 @@ jobs:
           docker push 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
 
       - name: Deploy application
+        id: deploy
         run: |
           OLD_IMAGE=$(docker inspect ${{ inputs.ecr_repository }} --format '{{.Config.Image}}' 2>/dev/null || true)
           echo "Previous image: $OLD_IMAGE"
 
-          docker pull 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+          echo "old_image=$OLD_IMAGE" >> "$GITHUB_OUTPUT"
+
+          NEW_IMAGE=627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+
+          docker pull "$NEW_IMAGE"
 
           docker stop ${{ inputs.ecr_repository }} || true
           docker rm ${{ inputs.ecr_repository }} || true
@@ -81,8 +86,7 @@ jobs:
           docker run -d \
             --name ${{ inputs.ecr_repository }} \
             -p 3000:3000 \
-            627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
-
+            "$NEW_IMAGE"
 
       - name: Verify deployment
         run: |
@@ -103,4 +107,28 @@ jobs:
 
           echo "Deployment verification failed!"
           docker logs ${{ inputs.ecr_repository }}
+
+          echo "Rolling back to previous image..."
+
+          OLD_IMAGE="${{ steps.deploy.outputs.old_image }}"
+
+          docker stop ${{ inputs.ecr_repository }} || true
+          docker rm ${{ inputs.ecr_repository }} || true
+
+          if [ -n "$OLD_IMAGE" ]; then
+            docker run -d \
+              --name ${{ inputs.ecr_repository }} \
+              -p 3000:3000 \
+              "$OLD_IMAGE"
+
+            sleep 3
+
+            echo "Checking rollback..."
+            curl --fail http://localhost:3000
+
+            echo "Rollback successful!"
+          else
+            echo "No previous image found. Nothing to roll back to."
+          fi
+
           exit 1
