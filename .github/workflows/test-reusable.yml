@@ -57,16 +57,16 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ inputs.aws_region }} | \
           docker login --username AWS --password-stdin \
-          627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+          ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
 
       - name: Tag Docker image
         run: |
           docker tag ${{ inputs.ecr_repository }}:${{ github.sha }} \
-          627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+          ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
 
       - name: Push Docker image to ECR
         run: |
-          docker push 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+          docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
 
       - name: Deploy application
         id: deploy
@@ -76,7 +76,7 @@ jobs:
 
           echo "old_image=$OLD_IMAGE" >> "$GITHUB_OUTPUT"
 
-          NEW_IMAGE=627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+          NEW_IMAGE=${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
 
           docker pull "$NEW_IMAGE"
 
