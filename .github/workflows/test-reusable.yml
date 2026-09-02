@@ -11,12 +11,12 @@ on:
       ecr_repository:
         description: "ECR repository name"
         required: true
-        type: string  
+        type: string
 
       aws_region:
         description: "AWS region"
         required: true
-        type: string  
+        type: string
 
 jobs:
   test:
@@ -57,17 +57,17 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ inputs.aws_region }}| \
           docker login --username AWS --password-stdin \
-          627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com    
-      
+          627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+
       - name: Tag Docker image
         run: |
           docker tag ${{ inputs.ecr_repository }}:${{ github.sha }} \
           627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
-      
+
       - name: Push Docker image to ECR
         run: |
-          docker push 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }} 
-      
+          docker push 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+
       - name: Deploy application
         run: |
           docker pull 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
@@ -79,16 +79,25 @@ jobs:
             --name ${{ inputs.ecr_repository }} \
             -p 3000:3000 \
             627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
-         
+
+
       - name: Verify deployment
         run: |
           echo "Checking application container..."
           docker ps --filter "name=${{ inputs.ecr_repository }}"
 
-          echo "Waiting for application to start..."
-          sleep 5
+          echo "Waiting for application to become ready..."
 
-          echo "Checking application response..."
-          curl --fail http://localhost:3000
+          for i in {1..10}; do
+            if curl --fail http://localhost:3000; then
+              echo "Deployment verification successful!"
+              exit 0
+            fi
 
-          echo "Deployment verification successful!"
+            echo "Application not ready yet. Attempt $i/10"
+            sleep 2
+          done
+
+          echo "Deployment verification failed!"
+          docker logs ${{ inputs.ecr_repository }}
+          exit 1
