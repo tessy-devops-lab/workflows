@@ -67,3 +67,15 @@ jobs:
       - name: Push Docker image to ECR
         run: |
           docker push 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }} 
+      
+      - name: Deploy application
+        run: |
+          docker pull 627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+
+          docker stop ${{ inputs.ecr_repository }} || true
+          docker rm ${{ inputs.ecr_repository }} || true
+
+          docker run -d \
+            --name ${{ inputs.ecr_repository }} \
+            -p 3000:3000 \
+            627407462345.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
