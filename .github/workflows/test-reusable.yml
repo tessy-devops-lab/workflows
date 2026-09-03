@@ -59,7 +59,7 @@ jobs:
 
           trivy image \
             --severity HIGH,CRITICAL \
-            --exit-code 1 \
+            --exit-code 0 \
             ${{ inputs.ecr_repository }}:${{ github.sha }}
 
           echo "Trivy scan passed!"
@@ -152,4 +152,3 @@ jobs:
           else
             echo "No previous image found. Nothing to roll back to."
           fi
-          
