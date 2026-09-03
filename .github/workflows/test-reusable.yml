@@ -59,7 +59,7 @@ jobs:
 
           trivy image \
             --severity HIGH,CRITICAL \
-            --exit-code 0 \
+            --exit-code 1 \
             ${{ inputs.ecr_repository }}:${{ github.sha }}
 
           echo "Trivy scan passed!"
