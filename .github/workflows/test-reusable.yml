@@ -53,6 +53,17 @@ jobs:
         run: |
           docker build -t ${{ inputs.ecr_repository }}:${{ github.sha }} .
 
+      - name: Trivy image scan
+        run: |
+          echo "Scanning Docker image for vulnerabilities..."
+
+          trivy image \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            ${{ inputs.ecr_repository }}:${{ github.sha }}
+
+          echo "Trivy scan passed!"
+
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ inputs.aws_region }} | \
@@ -66,7 +77,8 @@ jobs:
 
       - name: Push Docker image to ECR
         run: |
-          docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
+          docker push \
+          ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.ecr_repository }}:${{ github.sha }}
 
 
   deploy:
@@ -140,3 +152,4 @@ jobs:
           else
             echo "No previous image found. Nothing to roll back to."
           fi
+          
